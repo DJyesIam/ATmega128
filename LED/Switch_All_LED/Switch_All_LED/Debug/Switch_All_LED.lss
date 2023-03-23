@@ -3,29 +3,29 @@ Switch_All_LED.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  00000136  2**0
+  0 .data         00000000  00800100  00800100  0000013e  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         000000e2  00000000  00000000  00000054  2**1
+  1 .text         000000ea  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  00000136  2**0
+  2 .comment      00000030  00000000  00000000  0000013e  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000168  2**2
+  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000170  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000028  00000000  00000000  000001a8  2**0
+  4 .debug_aranges 00000020  00000000  00000000  000001b0  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   000008e4  00000000  00000000  000001d0  2**0
+  5 .debug_info   0000089a  00000000  00000000  000001d0  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 0000082b  00000000  00000000  00000ab4  2**0
+  6 .debug_abbrev 000007ec  00000000  00000000  00000a6a  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000302  00000000  00000000  000012df  2**0
+  7 .debug_line   000002b4  00000000  00000000  00001256  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000044  00000000  00000000  000015e4  2**2
+  8 .debug_frame  00000024  00000000  00000000  0000150c  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00000413  00000000  00000000  00001628  2**0
+  9 .debug_str    00000408  00000000  00000000  00001530  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    00000095  00000000  00000000  00001a3b  2**0
+ 10 .debug_loc    0000004d  00000000  00000000  00001938  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000018  00000000  00000000  00001ad0  2**0
+ 11 .debug_ranges 00000010  00000000  00000000  00001985  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -110,74 +110,80 @@ Disassembly of section .text:
   94:	de bf       	out	0x3e, r29	; 62
   96:	cd bf       	out	0x3d, r28	; 61
   98:	02 d0       	rcall	.+4      	; 0x9e <main>
-  9a:	21 c0       	rjmp	.+66     	; 0xde <_exit>
+  9a:	25 c0       	rjmp	.+74     	; 0xe6 <_exit>
 
 0000009c <__bad_interrupt>:
   9c:	b1 cf       	rjmp	.-158    	; 0x0 <__vectors>
 
 0000009e <main>:
-	for (j = 0; j < 1000; j++);
-}
+#include <util/delay.h>
 
 int main(void)
 {
-	DDRA = 0x0F;	// A의 하위 네 비트를 출력 상태로 만든다.
-  9e:	8f e0       	ldi	r24, 0x0F	; 15
-  a0:	8a bb       	out	0x1a, r24	; 26
-	PORTA = 0x00;	// 출력 상태를 0으로 초기화한다.
-  a2:	1b ba       	out	0x1b, r1	; 27
-	DDRB = 0x00;	// B의 모든 핀을 입력 상태로 만든다.
-  a4:	17 ba       	out	0x17, r1	; 23
-	PORTB = 0x01;	// B의 0번째 핀을 HIGH로 한다.(내부 풀업 저항 사용 목적)
-  a6:	81 e0       	ldi	r24, 0x01	; 1
-  a8:	88 bb       	out	0x18, r24	; 24
+	// DDRA |= 0x0F;	// PORTA의 하위 네 비트를 출력 상태(1)로 만든다.
+	DDRA |= ((1<<PORTA0) | (1<<PORTA1) | (1<<PORTA2)| (1<<PORTA3));
+  9e:	8a b3       	in	r24, 0x1a	; 26
+  a0:	8f 60       	ori	r24, 0x0F	; 15
+  a2:	8a bb       	out	0x1a, r24	; 26
+	// 위와 같은 코드. 핀이 나중에 바뀌었을 때 16진수를 16진수를 계산할 필요가 없다. 다른 부분에도 적용 가능
+	PORTA &= !0x0F;	// PORTA의 하위 네 비트를 0으로 초기화한다.
+  a4:	8b b3       	in	r24, 0x1b	; 27
+  a6:	1b ba       	out	0x1b, r1	; 27
+	DDRB &= !0x01;	// PORTB의 0번 핀을 입력 상태(0)로 만든다.
+  a8:	87 b3       	in	r24, 0x17	; 23
+  aa:	17 ba       	out	0x17, r1	; 23
+	PORTB |= 0x01;	// PORTB의 0번째 핀을 1로 만든다.(내부 풀업 저항 사용 목적)
+  ac:	88 b3       	in	r24, 0x18	; 24
+  ae:	81 60       	ori	r24, 0x01	; 1
+  b0:	88 bb       	out	0x18, r24	; 24
 	
-	unsigned char isON = 0;
-  aa:	80 e0       	ldi	r24, 0x00	; 0
+	unsigned char isON = 0;		// LED들이 켜져있는지 저장하는 변수
+  b2:	80 e0       	ldi	r24, 0x00	; 0
+	
 	while (1)
 	{
-		if (!(PINB & 0x01)){
-  ac:	b0 99       	sbic	0x16, 0	; 22
-  ae:	0d c0       	rjmp	.+26     	; 0xca <main+0x2c>
-			if (isON){
-  b0:	88 23       	and	r24, r24
-  b2:	29 f0       	breq	.+10     	; 0xbe <main+0x20>
-				 PORTA &= 0xF0;	
-  b4:	8b b3       	in	r24, 0x1b	; 27
-  b6:	80 7f       	andi	r24, 0xF0	; 240
-  b8:	8b bb       	out	0x1b, r24	; 27
-				 isON = 0;
-  ba:	80 e0       	ldi	r24, 0x00	; 0
-  bc:	06 c0       	rjmp	.+12     	; 0xca <main+0x2c>
+		if (!(PINB & 0x01)){	// 스위치가 눌리면
+  b4:	b0 99       	sbic	0x16, 0	; 22
+  b6:	0d c0       	rjmp	.+26     	; 0xd2 <main+0x34>
+			if (isON){	// LED가 다 켜져 있으면
+  b8:	88 23       	and	r24, r24
+  ba:	29 f0       	breq	.+10     	; 0xc6 <main+0x28>
+				 PORTA &= 0xF0;		// LED를 다 끈다.
+  bc:	8b b3       	in	r24, 0x1b	; 27
+  be:	80 7f       	andi	r24, 0xF0	; 240
+  c0:	8b bb       	out	0x1b, r24	; 27
+				 isON = 0;	
+  c2:	80 e0       	ldi	r24, 0x00	; 0
+  c4:	06 c0       	rjmp	.+12     	; 0xd2 <main+0x34>
 			}
-			else{
-				 PORTA |= ((PORTA & 0xF0) | 0x0F);
-  be:	8b b3       	in	r24, 0x1b	; 27
-  c0:	8f 60       	ori	r24, 0x0F	; 15
-  c2:	9b b3       	in	r25, 0x1b	; 27
-  c4:	89 2b       	or	r24, r25
-  c6:	8b bb       	out	0x1b, r24	; 27
+			else{	// LED가 다 꺼져 있으면
+				 PORTA |= ((PORTA & 0xF0) | 0x0F);	// LED를 다 킨다.
+  c6:	8b b3       	in	r24, 0x1b	; 27
+  c8:	8f 60       	ori	r24, 0x0F	; 15
+  ca:	9b b3       	in	r25, 0x1b	; 27
+  cc:	89 2b       	or	r24, r25
+  ce:	8b bb       	out	0x1b, r24	; 27
 				 isON = 1;
-  c8:	81 e0       	ldi	r24, 0x01	; 1
+  d0:	81 e0       	ldi	r24, 0x01	; 1
 	#else
 		//round up by default
 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
 	#endif
 
 	__builtin_avr_delay_cycles(__ticks_dc);
-  ca:	2f ef       	ldi	r18, 0xFF	; 255
-  cc:	33 ec       	ldi	r19, 0xC3	; 195
-  ce:	99 e0       	ldi	r25, 0x09	; 9
-  d0:	21 50       	subi	r18, 0x01	; 1
-  d2:	30 40       	sbci	r19, 0x00	; 0
-  d4:	90 40       	sbci	r25, 0x00	; 0
-  d6:	e1 f7       	brne	.-8      	; 0xd0 <main+0x32>
-  d8:	00 c0       	rjmp	.+0      	; 0xda <main+0x3c>
-  da:	00 00       	nop
-  dc:	e7 cf       	rjmp	.-50     	; 0xac <main+0xe>
+  d2:	2f ef       	ldi	r18, 0xFF	; 255
+  d4:	33 ec       	ldi	r19, 0xC3	; 195
+  d6:	99 e0       	ldi	r25, 0x09	; 9
+  d8:	21 50       	subi	r18, 0x01	; 1
+  da:	30 40       	sbci	r19, 0x00	; 0
+  dc:	90 40       	sbci	r25, 0x00	; 0
+  de:	e1 f7       	brne	.-8      	; 0xd8 <main+0x3a>
+  e0:	00 c0       	rjmp	.+0      	; 0xe2 <main+0x44>
+  e2:	00 00       	nop
+  e4:	e7 cf       	rjmp	.-50     	; 0xb4 <main+0x16>
 
-000000de <_exit>:
-  de:	f8 94       	cli
+000000e6 <_exit>:
+  e6:	f8 94       	cli
 
-000000e0 <__stop_program>:
-  e0:	ff cf       	rjmp	.-2      	; 0xe0 <__stop_program>
+000000e8 <__stop_program>:
+  e8:	ff cf       	rjmp	.-2      	; 0xe8 <__stop_program>
