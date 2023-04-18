@@ -193,19 +193,19 @@ int main(void)
 	
 	while (1)
 	{
-		if ((PINB & 0x01) == 0x00){
+		if ((PINB & 0x01) == 0x00){		// 스위치가 눌리면
  104:	b0 99       	sbic	0x16, 0	; 22
  106:	18 c0       	rjmp	.+48     	; 0x138 <main+0x80>
-			duty++;
+			duty++;		// on_duty를 1 증가시킨다.
  108:	0f 5f       	subi	r16, 0xFF	; 255
  10a:	1f 4f       	sbci	r17, 0xFF	; 255
-			if (duty == 10) duty = 0;
+			if (duty == 10) duty = 0;	// 만약 밝기가 최대면 밝기를 0으로 한다.
  10c:	0a 30       	cpi	r16, 0x0A	; 10
  10e:	11 05       	cpc	r17, r1
  110:	11 f4       	brne	.+4      	; 0x116 <main+0x5e>
  112:	00 e0       	ldi	r16, 0x00	; 0
  114:	10 e0       	ldi	r17, 0x00	; 0
-			PORTA = digit[duty];
+			PORTA = digit[duty];	// 현재의 밝기를 FND로 표시한다.
  116:	a1 e0       	ldi	r26, 0x01	; 1
  118:	b0 e0       	ldi	r27, 0x00	; 0
  11a:	ac 0f       	add	r26, r28
@@ -229,9 +229,9 @@ int main(void)
  132:	e1 f7       	brne	.-8      	; 0x12c <main+0x74>
  134:	00 c0       	rjmp	.+0      	; 0x136 <main+0x7e>
  136:	00 00       	nop
-			_delay_ms(200);
+			_delay_ms(200);		// 디바운싱용 딜레이
 		}
-		if ((count % PWM_CYCLE) == 0){
+		if ((count % PWM_CYCLE) == 0){	// 20ms마다
  138:	9a 01       	movw	r18, r20
  13a:	ad ec       	ldi	r26, 0xCD	; 205
  13c:	bc ec       	ldi	r27, 0xCC	; 204
@@ -251,15 +251,15 @@ int main(void)
  158:	42 17       	cp	r20, r18
  15a:	53 07       	cpc	r21, r19
  15c:	29 f4       	brne	.+10     	; 0x168 <main+0xb0>
-			PORTC |= 0x01;
+			PORTC |= 0x01;	// led를 켠다.
  15e:	85 b3       	in	r24, 0x15	; 21
  160:	81 60       	ori	r24, 0x01	; 1
  162:	85 bb       	out	0x15, r24	; 21
-			scount = 0;
+			scount = 0;		// scount 초기화
  164:	e0 e0       	ldi	r30, 0x00	; 0
  166:	f0 e0       	ldi	r31, 0x00	; 0
 		}
-		if (scount == duty) PORTC &= ~(0x01);
+		if (scount == duty) PORTC &= ~(0x01);	
  168:	e0 17       	cp	r30, r16
  16a:	f1 07       	cpc	r31, r17
  16c:	19 f4       	brne	.+6      	; 0x174 <main+0xbc>
@@ -272,6 +272,8 @@ int main(void)
  17a:	f1 f7       	brne	.-4      	; 0x178 <main+0xc0>
  17c:	00 c0       	rjmp	.+0      	; 0x17e <main+0xc6>
  17e:	00 00       	nop
+		// scount가 on_duty와 일치하는 순간 led를 끈다.
+		// on_duty가 클수록 led를 늦게 끄므로 led의 밝기가 증가하게 된다.
 		
 		_delay_ms(1);
 		scount++;

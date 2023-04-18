@@ -11,7 +11,7 @@
 void beep(int pin, uint16_t on_time, uint16_t off_time){
 	PORTC |= M0;
 	_delay_us(on_time);
-	PORTC |= M0;
+	PORTC &= ~M0;
 	_delay_us(off_time);
 }
 
@@ -24,18 +24,21 @@ void tone3(uint16_t fr, uint16_t dur){
 
 int main(void)
 {
-	int i;
+	int i = 0;
+	uint8_t btnPushed = 0;
 	int freq[] = {523, 587, 659, 698, 784, 880, 988, 1047};
 	DDRB = 0x00;	// PORTB의 모든 포트를 입력 모드로
 	PORTB = 0x01;	// PORTB의 0번 포트만 출력 HIGH(내부 풀업 저항 사용)
 	DDRC |= M0;		// PORTC의 0번 포트만 출력 모드로
 	while (1)
 	{
-		if (!(PINB & M0)){
-			for (i = 0; i < 8; i++){
-				tone3(freq[i], 300);
-				_delay_ms(500);
-			}
+		if (!(PINB & M0)) btnPushed = 1;
+		else btnPushed = 0;
+		
+		if (btnPushed) tone3(freq[i], 300);
+		else{
+			if (i != 8) i++;
+			else i = 0;
 		}
 	}
 }
