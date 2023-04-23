@@ -1,4 +1,4 @@
-// tone2 함수 만들어서 사용하기
+// tone3 함수 만들어서 사용하기
 
 #include <avr/io.h>
 #include <stdint.h>
