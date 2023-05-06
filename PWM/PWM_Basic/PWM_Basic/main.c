@@ -1,9 +1,9 @@
 #include <avr/io.h>
 #define F_CPU 16000000UL
 #include <util/delay.h>
-#define TC0_FAST_PWM (1 << WGM01 | 1 << WGM00)
-#define TC0_NONINVERT_PWM (1 << COM01)
-#define TC0_PRESCALE_32 (1 << CS01 | 1 << CS00)
+#define TC0_FAST_PWM (1 << WGM01 | 1 << WGM00)	// 웨이브 제너레이션 모드 : 고속 PWM 모드(11)
+#define TC0_NONINVERT_PWM (1 << COM01)			// 비교출력모드 : BOTTOM SET, OCR0 CLEAR(10)
+#define TC0_PRESCALE_32 (1 << CS01 | 1 << CS00) // 프리스케일 32(011)
 
 void disp_FND(unsigned char num);
 void initialize(void);
@@ -42,6 +42,7 @@ void disp_digit(unsigned char num, unsigned char d){
 	PORTC = digit[num];
 	PORTG = 1<<d;
 }
+
 void initialize(){
 	DDRB |= 1 << PORTB4; 
 	DDRC=0xFF;

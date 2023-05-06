@@ -21,11 +21,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
   8 .debug_frame  00000070  00000000  00000000  0000190c  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    0000042c  00000000  00000000  0000197c  2**0
+  9 .debug_str    00000434  00000000  00000000  0000197c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    000001b0  00000000  00000000  00001da8  2**0
+ 10 .debug_loc    000001b0  00000000  00000000  00001db0  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000028  00000000  00000000  00001f58  2**0
+ 11 .debug_ranges 00000028  00000000  00000000  00001f60  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -282,10 +282,10 @@ void disp_FND(unsigned char num){
  190:	08 95       	ret
 
 00000192 <initialize>:
-void disp_digit(unsigned char num, unsigned char d){
 	PORTC = digit[num];
 	PORTG = 1<<d;
 }
+
 void initialize(){
 	DDRB |= 1 << PORTB4; 
  192:	87 b3       	in	r24, 0x17	; 23
